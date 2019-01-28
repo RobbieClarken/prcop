@@ -4,9 +4,19 @@ from behave import given, then, when
 import prcop
 
 
-@given("repo has a PR with {num_reviews:d} reviews")
-def step_impl(context, num_reviews):
-    context.reviewers = [{"status": "APPROVED"}] * num_reviews
+@given("a repo has a PR")
+def step_impl(context):
+    context.reviewers = []
+
+
+@given("the repo has {count:d} approvals")  # noqa: F811
+def step_impl(context, count):
+    context.reviewers += [{"status": "APPROVED"}] * count
+
+
+@given("the repo has {count:d} needs-works")  # noqa: F811
+def step_impl(context, count):
+    context.reviewers += [{"status": "NEEDS_WORK"}] * count
 
 
 @when("we check if reviews are due")  # noqa: F811
