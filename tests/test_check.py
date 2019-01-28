@@ -5,7 +5,7 @@ import prcop
 
 class PR:
     def __init__(self):
-        self.data = {"reviewers": []}
+        self.data = {"title": "pr-title", "reviewers": []}
 
     def with_approvals(self, n):
         self.data["reviewers"] += [{"status": "APPROVED"}] * n
