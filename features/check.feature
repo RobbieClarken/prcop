@@ -1,3 +1,5 @@
+@fixture.requests_mock
+@fixture.freezegun
 Feature: we can check PRs
 
   Scenario: PR has no reviews
@@ -22,3 +24,19 @@ Feature: we can check PRs
        And the repo has 2 approvals
       When we check if reviews are due
       Then check will return 0 alerts
+
+  Scenario: PR has no reviews but an alert has been sent recently
+     Given a repo has a PR named "pr-name-1"
+       And the repo has 0 approvals
+       And we check if reviews are due
+       And we wait 1 minute
+      When we check if reviews are due
+      Then check will return 0 alerts
+
+  Scenario: An alert was sent long enough ago that another is due
+     Given a repo has a PR named "pr-name-1"
+       And the repo has 0 approvals
+       And we check if reviews are due
+       And we wait 3 hours
+      When we check if reviews are due
+      Then check will return 1 alerts

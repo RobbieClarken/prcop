@@ -4,7 +4,7 @@ repos:
     rev: 18.9b0
     hooks:
       - id: black
-        args: [--safe, --quiet, --line-length, "100"]
+        args: [--safe, --quiet, --line-length, "95"]
         python_version: python3.7
 
   - repo: https://github.com/RobbieClarken/isort
