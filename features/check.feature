@@ -40,3 +40,10 @@ Feature: we can check PRs
        And we wait 3 hours
       When we check if reviews are due
       Then check will return 1 alerts
+
+  Scenario: Alerts are not sent outside business hours
+     Given a repo has a PR named "pr-name-1"
+       And the repo has 0 approvals
+       And the time is 17:01 on a Monday
+      When we check if reviews are due
+      Then check will return 0 alerts

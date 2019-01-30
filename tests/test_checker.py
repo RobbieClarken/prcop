@@ -1,6 +1,7 @@
 from unittest.mock import create_autospec
 
 import pytest
+from freezegun import freeze_time
 
 from prcop.checker import Checker, JsonRecord
 
@@ -23,6 +24,7 @@ class PR:
         ([PR().with_approvals(2).data, PR().with_approvals(0).data], 1),
     ],
 )
+@freeze_time("Mon, 28 Jan 2019 09:00")
 def test_check_checks_each_PR(requests_mock, values, alert_count):
     data = {"values": values}
     base_url = "http://test"

@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from behave import given, then, when
 
@@ -35,6 +35,15 @@ def step_impl(context, value, unit):
     if not unit.endswith("s"):
         unit += "s"
     context.frozen_datetime.tick(delta=timedelta(**{unit: value}))
+
+
+@given("the time is {hour:d}:{minute:d} on a {day}")  # noqa: F811
+def step_impl(context, hour, minute, day):
+    day_names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    day_index = day_names.index(day)
+    dt = datetime(2018, 1, 27, hour, minute)  # a sunday
+    dt += timedelta(days=day_index)
+    context.frozen_datetime.move_to(dt)
 
 
 @when("we check if reviews are due")  # noqa: F811

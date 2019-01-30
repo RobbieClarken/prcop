@@ -4,12 +4,16 @@ from pathlib import Path
 
 import requests
 
+from .business_hours import within_business_hours
+
 
 class Checker:
     def __init__(self, *, record):
         self._record = record
 
     def check(self, base_url, project, repo):
+        if not within_business_hours(datetime.now()):
+            return []
         url = f"{base_url}/rest/api/1.0/projects/{project}/repos/{repo}/pull-requests"
         response = requests.get(url)
         alerts = []
