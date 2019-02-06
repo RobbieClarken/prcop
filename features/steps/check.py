@@ -5,10 +5,13 @@ from behave import given, then, when
 import prcop
 
 
-@given('a repo has a PR named "{name}"')
-def step_impl(context, name):
+@given('a PR named "{name}" is opened on {time}')
+def step_impl(context, name, time):
     context.name = name
     context.reviewers = []
+    dt = _parse_time_str(time)
+    context.frozen_datetime.move_to(dt)
+    context.opened = dt.timestamp() * 1000
 
 
 @given("the repo has {count:d} approvals")  # noqa: F811
@@ -23,11 +26,7 @@ def step_impl(context, count):
 
 @given("we check if reviews are due")  # noqa: F811
 def step_impl(context):
-    BASE_URL = "http://bitbucket.test"
-    url = f"{BASE_URL}/rest/api/1.0/projects/project1/repos/repo1/pull-requests"
-    data = {"values": [{"id": 1, "title": context.name, "reviewers": context.reviewers}]}
-    context.requests_mock.get(url, json=data)
-    prcop.check(BASE_URL, "project1", "repo1")
+    _check(context)
 
 
 @given("we wait {value:d} {unit}")  # noqa: F811
@@ -37,22 +36,14 @@ def step_impl(context, value, unit):
     context.frozen_datetime.tick(delta=timedelta(**{unit: value}))
 
 
-@given("the time is {hour:d}:{minute:d} on a {day}")  # noqa: F811
-def step_impl(context, hour, minute, day):
-    day_names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-    day_index = day_names.index(day)
-    dt = datetime(2018, 1, 27, hour, minute)  # a sunday
-    dt += timedelta(days=day_index)
-    context.frozen_datetime.move_to(dt)
+@given("the time is {time}")  # noqa: F811
+def step_impl(context, time):
+    context.frozen_datetime.move_to(_parse_time_str(time))
 
 
 @when("we check if reviews are due")  # noqa: F811
 def step_impl(context):
-    BASE_URL = "http://bitbucket.test"
-    url = f"{BASE_URL}/rest/api/1.0/projects/project1/repos/repo1/pull-requests"
-    data = {"values": [{"id": 1, "title": context.name, "reviewers": context.reviewers}]}
-    context.requests_mock.get(url, json=data)
-    context.alerts = prcop.check(BASE_URL, "project1", "repo1")
+    context.alerts = _check(context)
 
 
 @then("check will return {num_alerts:d} alerts")  # noqa: F811
@@ -65,3 +56,31 @@ def step_impl(context, num_alerts):
 @then("the text of the first alert will be")  # noqa: F811
 def step_impl(context):
     assert context.alerts[0] == context.text
+
+
+def _check(context):
+    BASE_URL = "http://bitbucket.test"
+    url = f"{BASE_URL}/rest/api/1.0/projects/project1/repos/repo1/pull-requests"
+    data = {
+        "values": [
+            {
+                "id": 1,
+                "title": context.name,
+                "createdDate": context.opened,
+                "reviewers": context.reviewers,
+            }
+        ]
+    }
+    context.requests_mock.get(url, json=data)
+    return prcop.check(BASE_URL, "project1", "repo1")
+
+
+def _parse_time_str(s):
+    """
+    s should be: {weekday}, {day_of_month} {month} {year} at {hour}:{minute}
+    """
+    day, s = s.split(", ", 1)
+    dt = datetime.strptime(s, "%d %b %Y at %H:%M")
+    if dt.strftime("%A") != day:
+        raise Exception(f"{s} is not a {day}")
+    return dt

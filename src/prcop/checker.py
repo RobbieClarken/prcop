@@ -19,6 +19,9 @@ class Checker:
         alerts = []
         for pr in response.json()["values"]:
             pr_id = str(pr["id"])
+            opened = datetime.fromtimestamp(pr["createdDate"] / 1000)
+            if datetime.now() - opened < timedelta(hours=3):
+                continue
             approvals = sum(review["status"] == "APPROVED" for review in pr["reviewers"])
             needs_work = any(review["status"] == "NEEDS_WORK" for review in pr["reviewers"])
             if not self._record.alerted_recently(pr_id) and approvals < 2 and not needs_work:

@@ -14,7 +14,7 @@ def request_mock_fixture(context):
 
 @fixture
 def freezegun_fixture(context):
-    with freezegun.freeze_time() as frozen_datetime:
+    with freezegun.freeze_time("2019-02-04 16:00") as frozen_datetime:
         context.frozen_datetime = frozen_datetime
         yield
 

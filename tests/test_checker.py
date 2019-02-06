@@ -8,7 +8,7 @@ from prcop.checker import Checker, JsonRecord
 
 class PR:
     def __init__(self):
-        self.data = {"id": 1, "title": "pr-title", "reviewers": []}
+        self.data = {"id": 1, "createdDate": 0, "title": "pr-title", "reviewers": []}
 
     def with_approvals(self, n):
         self.data["reviewers"] += [{"status": "APPROVED"}] * n
