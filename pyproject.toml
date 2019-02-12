@@ -17,6 +17,7 @@ pytest = "^3.0"
 behave = "^1.2"
 requests_mock = "^1.5"
 freezegun = "^0.3.11"
+coverage = "^4.5"
 
 [tool.isort]
 combine_as_imports = true

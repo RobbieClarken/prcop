@@ -1,0 +1,11 @@
+[run]
+branch = true
+source = prcop
+
+[paths]
+source =
+   src/prcop
+   .tox/*/lib/python*/site-packages/prcop
+
+[report]
+show_missing = true
