@@ -72,7 +72,7 @@ def _check(context):
         ]
     }
     context.requests_mock.get(url, json=data)
-    return prcop.check(BASE_URL, "project1", "repo1")
+    return prcop.check(BASE_URL, ["project1/repo1"])
 
 
 def _parse_time_str(s):

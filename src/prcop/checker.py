@@ -80,13 +80,14 @@ class Repo:
 
 
 class Checker:
-    def __init__(self, *, record):
+    def __init__(self, *, url, record):
+        self._base_url = url
         self._record = record
 
-    def check(self, base_url, project, repo):
+    def check(self, project, repo):
         if not within_business_hours(datetime.now()):
             return []
-        return Repo(base_url, project, repo, record=self._record).alerts()
+        return Repo(self._base_url, project, repo, record=self._record).alerts()
 
 
 class JsonRecord:
@@ -110,4 +111,10 @@ class JsonRecord:
             return {}
 
 
-check = Checker(record=JsonRecord()).check
+def check(url, repos):
+    checker = Checker(url=url, record=JsonRecord())
+    alerts = []
+    for repo in repos:
+        project_key, repo_key = repo.split("/")
+        alerts.extend(checker.check(project_key, repo_key))
+    return alerts

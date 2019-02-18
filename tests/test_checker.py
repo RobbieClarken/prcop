@@ -32,5 +32,5 @@ def test_check_checks_each_PR(requests_mock, values, alert_count):
     requests_mock.get(url, json=data)
     mock_record = create_autospec(JsonRecord, instance=True)
     mock_record.alerted_recently.return_value = False
-    alerts = Checker(record=mock_record).check(base_url, "project1", "repo1")
+    alerts = Checker(url=base_url, record=mock_record).check("project1", "repo1")
     assert len(alerts) == alert_count
