@@ -2,9 +2,9 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
-import requests
-
 from .business_hours import business_hours_between_dates, within_business_hours
+from .config import Config
+from .http_client import HttpClient
 
 
 class PullRequest:
@@ -60,34 +60,37 @@ class PullRequest:
 
 
 class Repo:
-    def __init__(self, base_url, project, repo, *, record):
+    def __init__(self, base_url, project, repo, *, record, http):
         self._base_url = base_url
         self.project_slug = project
         self.slug = repo
         self._record = record
+        self._http = http
 
     def alerts(self):
         url = (
             f"{self._base_url}/rest/api/1.0/projects/{self.project_slug}"
             f"/repos/{self.slug}/pull-requests"
         )
-        response = requests.get(url)
+        api_response = self._http.get(url)
         alerts = []
-        for pr_data in response.json()["values"]:
+        for pr_data in api_response["values"]:
             pr = PullRequest(pr_data, repo=self, record=self._record)
             alerts += pr.alerts()
         return alerts
 
 
 class Checker:
-    def __init__(self, *, url, record):
+    def __init__(self, *, url, record, http):
         self._base_url = url
         self._record = record
+        self._http = http
 
     def check(self, project, repo):
         if not within_business_hours(datetime.now()):
             return []
-        return Repo(self._base_url, project, repo, record=self._record).alerts()
+        repo = Repo(self._base_url, project, repo, record=self._record, http=self._http)
+        return repo.alerts()
 
 
 class JsonRecord:
@@ -111,8 +114,9 @@ class JsonRecord:
             return {}
 
 
-def check(url, repos):
-    checker = Checker(url=url, record=JsonRecord())
+def check(url, repos, *, config=Config()):
+    http = HttpClient(config)
+    checker = Checker(url=url, record=JsonRecord(), http=http)
     alerts = []
     for repo in repos:
         project_key, repo_key = repo.split("/")

@@ -13,3 +13,10 @@ def test_checker_returns_alerts_from_each_repo(mocker):
         call("project1", "repo1"),
         call("project2", "repo2"),
     ]
+
+
+def test_checker_can_configure_http_client(mocker):
+    config = object()
+    MockHttpClient = mocker.patch("prcop.checker.HttpClient", autospec=True)
+    check("http://test", [], config=config)
+    assert MockHttpClient.call_args == call(config)

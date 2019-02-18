@@ -3,7 +3,8 @@ from unittest.mock import create_autospec
 import pytest
 from freezegun import freeze_time
 
-from prcop.checker import Checker, JsonRecord
+from prcop.checker import Checker, Config, JsonRecord
+from prcop.http_client import HttpClient
 
 
 class PR:
@@ -32,5 +33,7 @@ def test_check_checks_each_PR(requests_mock, values, alert_count):
     requests_mock.get(url, json=data)
     mock_record = create_autospec(JsonRecord, instance=True)
     mock_record.alerted_recently.return_value = False
-    alerts = Checker(url=base_url, record=mock_record).check("project1", "repo1")
+    http = HttpClient(Config())
+    checker = Checker(url=base_url, record=mock_record, http=http)
+    alerts = checker.check("project1", "repo1")
     assert len(alerts) == alert_count
