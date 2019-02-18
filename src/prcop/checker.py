@@ -4,7 +4,7 @@ from pathlib import Path
 
 import requests
 
-from .business_hours import within_business_hours
+from .business_hours import business_hours_between_dates, within_business_hours
 
 
 class PullRequest:
@@ -19,7 +19,7 @@ class PullRequest:
 
     def alerts(self):
         if (
-            self._time_since_opened >= self._MIN_TIME_OPENED
+            self._business_hours_since_opened >= self._MIN_TIME_OPENED
             and not self._recently_alerted
             and self._approvals < self._MIN_APPROVALS
             and not self._needs_work
@@ -49,8 +49,10 @@ class PullRequest:
         return any(review["status"] == "NEEDS_WORK" for review in self._data["reviewers"])
 
     @property
-    def _time_since_opened(self):
-        return datetime.now() - datetime.fromtimestamp(self._data["createdDate"] / 1000)
+    def _business_hours_since_opened(self):
+        return business_hours_between_dates(
+            datetime.fromtimestamp(self._data["createdDate"] / 1000), datetime.now()
+        )
 
     @property
     def _alert_message(self):

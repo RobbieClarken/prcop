@@ -5,7 +5,7 @@ repos:
     hooks:
       - id: black
         args: [--safe, --quiet]
-        python_version: python3.7
+        language_version: python3.7
 
   - repo: https://gitlab.com/pycqa/flake8
     rev: "3.7.3"

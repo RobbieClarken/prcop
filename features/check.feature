@@ -56,3 +56,10 @@ Feature: we can check PRs
        And the repo has 0 approvals
       When we check if reviews are due
       Then check will return 0 alerts
+
+  Scenario: Alerts are not sent if PR has if not enough business hours have passed
+     Given a PR named "pr-name-1" is opened on Friday, 1 Feb 2019 at 16:59
+       And the time is Monday, 4 Feb 2019 at 09:01
+       And the repo has 0 approvals
+      When we check if reviews are due
+      Then check will return 0 alerts
