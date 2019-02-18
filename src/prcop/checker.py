@@ -123,7 +123,7 @@ class JsonRecord:
 
 
 def check(url, repos, *, config=Config()):
-    http = HttpClient(config)
+    http = HttpClient(verify_https=config.verify_https)
     checker = Checker(url=url, record=JsonRecord(), http=http)
     alerts = []
     for repo in repos:
