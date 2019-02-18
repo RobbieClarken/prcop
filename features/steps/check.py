@@ -55,7 +55,7 @@ def step_impl(context, num_alerts):
 
 @then("the text of the first alert will be")  # noqa: F811
 def step_impl(context):
-    assert context.alerts[0] == context.text
+    assert str(context.alerts[0]) == context.text, f"incorrect alert text: {context.alerts[0]}"
 
 
 def _check(context):

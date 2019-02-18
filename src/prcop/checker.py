@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from .alerts import ReviewOverdueAlert
 from .business_hours import business_hours_between_dates, within_business_hours
 from .config import Config
 from .http_client import HttpClient
@@ -19,21 +20,25 @@ class PullRequest:
 
     def alerts(self):
         if (
-            self._business_hours_since_opened >= self._MIN_TIME_OPENED
+            self.business_hours_since_opened >= self._MIN_TIME_OPENED
             and not self._recently_alerted
-            and self._approvals < self._MIN_APPROVALS
+            and self.reviews_remaining
             and not self._needs_work
         ):
             self._record.record_alert(self._id)
-            return [self._alert_message]
+            return [ReviewOverdueAlert(self)]
         return []
+
+    @property
+    def reviews_remaining(self):
+        return max(self._MIN_APPROVALS - self._approvals, 0)
 
     @property
     def _id(self):
         return str(self._data["id"])
 
     @property
-    def _title(self):
+    def title(self):
         return self._data["title"]
 
     @property
@@ -49,19 +54,22 @@ class PullRequest:
         return any(review["status"] == "NEEDS_WORK" for review in self._data["reviewers"])
 
     @property
-    def _business_hours_since_opened(self):
+    def business_hours_since_opened(self):
         return business_hours_between_dates(
             datetime.fromtimestamp(self._data["createdDate"] / 1000), datetime.now()
         )
 
     @property
-    def _alert_message(self):
-        return f'{self._repo.project_slug}/{self._repo.slug} PR: "{self._title}" needs reviews'
+    def url(self):
+        return (
+            f"{self._repo.base_url}/projects/{self._repo.project_slug}/"
+            f"repos/{self._repo.slug}/pull-requests/{self._id}/"
+        )
 
 
 class Repo:
     def __init__(self, base_url, project, repo, *, record, http):
-        self._base_url = base_url
+        self.base_url = base_url
         self.project_slug = project
         self.slug = repo
         self._record = record
@@ -69,7 +77,7 @@ class Repo:
 
     def alerts(self):
         url = (
-            f"{self._base_url}/rest/api/1.0/projects/{self.project_slug}"
+            f"{self.base_url}/rest/api/1.0/projects/{self.project_slug}"
             f"/repos/{self.slug}/pull-requests"
         )
         api_response = self._http.get(url)
