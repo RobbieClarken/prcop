@@ -11,6 +11,7 @@ authors = ["RobbieClarken <robbie.clarken@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.7"
 requests = "^2.21"
+click = "^7.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
@@ -19,6 +20,9 @@ requests_mock = "^1.5"
 freezegun = "^0.3.11"
 coverage = "^4.5"
 pytest_mock = "^1.10"
+
+[tool.poetry.scripts]
+prcop = "prcop.cli:cli"
 
 [tool.isort]
 combine_as_imports = true
