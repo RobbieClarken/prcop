@@ -5,8 +5,16 @@ from behave import given, then, when
 import prcop
 
 
+class MockReporter:
+    reports = None
+
+    def report(self, alerts):
+        self.reports = alerts
+
+
 @given('a PR named "{name}" is opened on {time}')
 def step_impl(context, name, time):
+    context.reporter = MockReporter()
     context.name = name
     context.reviewers = []
     dt = _parse_time_str(time)
@@ -46,16 +54,17 @@ def step_impl(context):
     context.alerts = _check(context)
 
 
-@then("check will return {num_alerts:d} alerts")  # noqa: F811
+@then("check will report {num_alerts:d} alerts")  # noqa: F811
 def step_impl(context, num_alerts):
     assert (
-        len(context.alerts) == num_alerts
+        len(context.reporter.reports) == num_alerts
     ), f"expected {num_alerts} alerts, got {len(context.alerts)}"
 
 
 @then("the text of the first alert will be")  # noqa: F811
 def step_impl(context):
-    assert str(context.alerts[0]) == context.text, f"incorrect alert text: {context.alerts[0]}"
+    alert_text = str(context.reporter.reports[0])
+    assert alert_text == context.text, f"incorrect alert text: {alert_text}"
 
 
 def _check(context):
@@ -72,7 +81,7 @@ def _check(context):
         ]
     }
     context.requests_mock.get(url, json=data)
-    return prcop.check(BASE_URL, ["project1/repo1"])
+    return prcop.check(BASE_URL, ["project1/repo1"], reporter=context.reporter)
 
 
 def _parse_time_str(s):

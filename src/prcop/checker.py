@@ -123,7 +123,7 @@ class JsonRecord:
             return {}
 
 
-def check(url, repos, *, config=Config()):
+def check(url, repos, *, reporter, config=Config()):
     http = HttpClient(verify_https=config.verify_https)
     record = JsonRecord(database=config.database)
     checker = Checker(url=url, record=record, http=http)
@@ -131,4 +131,4 @@ def check(url, repos, *, config=Config()):
     for repo in repos:
         project_key, repo_key = repo.split("/")
         alerts.extend(checker.check(project_key, repo_key))
-    return alerts
+    reporter.report(alerts)

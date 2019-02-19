@@ -7,7 +7,7 @@ Feature: we can check PRs
        And we wait 3 hours
        And the repo has 0 approvals
       When we check if reviews are due
-      Then check will return 1 alerts
+      Then check will report 1 alerts
        And the text of the first alert will be
            """
            Pull request "pr-name-1" (opened 3 business hours ago) needs 2 more reviews:
@@ -19,13 +19,13 @@ Feature: we can check PRs
        And the repo has 0 approvals
        And the repo has 1 needs-works
       When we check if reviews are due
-      Then check will return 0 alerts
+      Then check will report 0 alerts
 
   Scenario: PR has enough approvals
      Given a PR named "pr-name-1" is opened on Monday, 4 Feb 2019 at 09:00
        And the repo has 2 approvals
       When we check if reviews are due
-      Then check will return 0 alerts
+      Then check will report 0 alerts
 
   Scenario: PR has no reviews but an alert has been sent recently
      Given a PR named "pr-name-1" is opened on Monday, 4 Feb 2019 at 09:00
@@ -33,7 +33,7 @@ Feature: we can check PRs
        And we check if reviews are due
        And we wait 1 minute
       When we check if reviews are due
-      Then check will return 0 alerts
+      Then check will report 0 alerts
 
   Scenario: An alert was sent long enough ago that another is due
      Given a PR named "pr-name-1" is opened on Monday, 4 Feb 2019 at 09:00
@@ -42,25 +42,25 @@ Feature: we can check PRs
        And we check if reviews are due
        And we wait 3 hours
       When we check if reviews are due
-      Then check will return 1 alerts
+      Then check will report 1 alerts
 
   Scenario: Alerts are not sent outside business hours
      Given a PR named "pr-name-1" is opened on Monday, 4 Feb 2019 at 09:00
        And the repo has 0 approvals
        And the time is Monday, 4 Feb 2019 at 17:01
       When we check if reviews are due
-      Then check will return 0 alerts
+      Then check will report 0 alerts
 
   Scenario: Alerts are not sent if PR has only been opened a short time
      Given a PR named "pr-name-1" is opened on Monday, 4 Feb 2019 at 09:00
        And the time is Monday, 4 Feb 2019 at 09:01
        And the repo has 0 approvals
       When we check if reviews are due
-      Then check will return 0 alerts
+      Then check will report 0 alerts
 
   Scenario: Alerts are not sent if PR has if not enough business hours have passed
      Given a PR named "pr-name-1" is opened on Friday, 1 Feb 2019 at 16:59
        And the time is Monday, 4 Feb 2019 at 09:01
        And the repo has 0 approvals
       When we check if reviews are due
-      Then check will return 0 alerts
+      Then check will report 0 alerts
