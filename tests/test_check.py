@@ -1,7 +1,7 @@
-from types import SimpleNamespace
 from unittest.mock import call
 
 from prcop.checker import check
+from prcop.config import Config
 
 
 def test_checker_returns_alerts_from_each_repo(mocker):
@@ -16,8 +16,15 @@ def test_checker_returns_alerts_from_each_repo(mocker):
     ]
 
 
-def test_checker_can_configure_http_client(mocker):
-    config = SimpleNamespace(verify_https=False)
+def test_checker_can_configure_HttpClient(mocker):
+    config = Config(verify_https=False)
     MockHttpClient = mocker.patch("prcop.checker.HttpClient", autospec=True)
     check("http://test", [], config=config)
     assert MockHttpClient.call_args == call(verify_https=False)
+
+
+def test_checker_can_configure_JsonRecord(mocker):
+    config = Config(database="/data/db.json")
+    MockJsonRecord = mocker.patch("prcop.checker.JsonRecord", autospec=True)
+    check("http://test", [], config=config)
+    assert MockJsonRecord.call_args == call(database="/data/db.json")

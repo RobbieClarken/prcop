@@ -102,7 +102,8 @@ class Checker:
 
 
 class JsonRecord:
-    _db_path = Path("/tmp/prcopdb.json")
+    def __init__(self, *, database):
+        self._db_path = Path(database)
 
     def record_alert(self, pr_id):
         db = self._read_db()
@@ -124,7 +125,8 @@ class JsonRecord:
 
 def check(url, repos, *, config=Config()):
     http = HttpClient(verify_https=config.verify_https)
-    checker = Checker(url=url, record=JsonRecord(), http=http)
+    record = JsonRecord(database=config.database)
+    checker = Checker(url=url, record=record, http=http)
     alerts = []
     for repo in repos:
         project_key, repo_key = repo.split("/")

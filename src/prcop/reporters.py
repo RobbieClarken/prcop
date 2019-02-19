@@ -2,12 +2,10 @@ from .http_client import HttpClient
 
 
 class SlackReporter:
-    def __init__(self, *, url, channel, http=None):
+    def __init__(self, *, url, channel):
         self._url = url
         self._channel = channel
-        if http is None:
-            http = HttpClient()
-        self._http = http
+        self._http = HttpClient()
 
     def report(self, alerts):
         for alert in alerts:
