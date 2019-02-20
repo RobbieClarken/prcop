@@ -1,11 +1,13 @@
 import json
 import logging
 from datetime import datetime, timedelta
+from json.decoder import JSONDecodeError
 from pathlib import Path
 
 from .alerts import ReviewOverdueAlert
 from .business_hours import business_hours_between_dates, within_business_hours
 from .config import Config
+from .exceptions import FailedToGetData
 from .http_client import HttpClient
 
 
@@ -93,8 +95,14 @@ class Repo:
             f"/repos/{self.slug}/pull-requests"
         )
         api_response = self._http.get(url)
+        try:
+            prs = api_response.json()["values"]
+        except (JSONDecodeError, KeyError):
+            raise FailedToGetData(
+                f"{self.full_slug} failed to return pr data: {api_response.text}"
+            )
         alerts = []
-        for pr_data in api_response["values"]:
+        for pr_data in prs:
             pr = PullRequest(pr_data, repo=self, record=self._record)
             alerts += pr.alerts()
         return alerts
@@ -145,8 +153,14 @@ def check(url, repos, *, reporter, config=Config()):
     record = JsonRecord(database=config.database)
     checker = Checker(url=url, record=record, http=http)
     alerts = []
+    exception = None
     for repo in repos:
         logger.info(f"checking repo: {repo}")
         project_slug, repo_slug = repo.split("/")
-        alerts.extend(checker.check(project_slug, repo_slug))
+        try:
+            alerts.extend(checker.check(project_slug, repo_slug))
+        except FailedToGetData as exc:
+            exception = exc
     reporter.report(alerts)
+    if exception:
+        raise exception

@@ -1,5 +1,17 @@
+import json
+from dataclasses import dataclass
+
 import requests
 import urllib3
+
+
+@dataclass
+class HttpResponse:
+    status_code: int
+    text: str
+
+    def json(self):
+        return json.loads(self.text)
 
 
 class HttpClient:
@@ -10,7 +22,8 @@ class HttpClient:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def get(self, url):
-        return self._session.get(url).json()
+        response = self._session.get(url)
+        return HttpResponse(status_code=response.status_code, text=response.text)
 
     def post(self, url, payload={}):
         self._session.post(url, json=payload)

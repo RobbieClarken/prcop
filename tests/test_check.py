@@ -1,11 +1,14 @@
 from unittest.mock import Mock, call, create_autospec
 
+import pytest
+
 from prcop.checker import check
 from prcop.config import Config
+from prcop.exceptions import FailedToGetData
 from prcop.reporters import SlackReporter
 
 
-def test_checker_reports_alerts_from_each_repo(mocker):
+def test_check_reports_alerts_from_each_repo(mocker):
     MockChecker = mocker.patch("prcop.checker.Checker", autospec=True)
     mock_checker = MockChecker.return_value
     mock_checker.check.side_effect = [["alert1", "alert2"], ["alert3"]]
@@ -17,6 +20,17 @@ def test_checker_reports_alerts_from_each_repo(mocker):
         call("project1", "repo1"),
         call("project2", "repo2"),
     ]
+
+
+def test_check_handles_error(mocker):
+    MockChecker = mocker.patch("prcop.checker.Checker", autospec=True)
+    mock_checker = MockChecker.return_value
+    mock_checker.check.side_effect = [FailedToGetData(), ["alert3"]]
+    mock_reporter = create_autospec(SlackReporter, instance=True)
+    with pytest.raises(FailedToGetData):
+        check("http://test", ["project1/repo1", "project2/repo2"], reporter=mock_reporter)
+    alerts = mock_reporter.report.call_args[0][0]
+    assert alerts == ["alert3"]
 
 
 def test_checker_can_configure_HttpClient(mocker):
