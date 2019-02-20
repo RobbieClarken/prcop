@@ -14,7 +14,7 @@ repos:
         language_version: python3.7
 
   - repo: https://github.com/RobbieClarken/isort
-    rev: 2b48ad95e9ae84fe4b77c37bcfd9980c939b53b2
+    rev: 4.3.4-pre-commit
     hooks:
       - id: isort
 
