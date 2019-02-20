@@ -1,5 +1,7 @@
+import logging
 from unittest.mock import ANY, call
 
+import pytest
 from click.testing import CliRunner
 
 from prcop.cli import cli
@@ -49,7 +51,6 @@ def test_run_command_passes_in_optional_parameters(mocker):
             "--no-verify-https",
             "--database",
             "/data/db1.json",
-            "channel1",
             "project1/repo1",
         ],
     )
@@ -57,3 +58,28 @@ def test_run_command_passes_in_optional_parameters(mocker):
     config = mock_check.call_args[1]["config"]
     assert config.verify_https is False
     assert config.database == "/data/db1.json"
+
+
+@pytest.mark.parametrize(
+    "args, expected_log_level",
+    [([], logging.WARNING), (["-v"], logging.INFO), (["-vv"], logging.DEBUG)],
+)
+def test_run_command_configures_log_level(mocker, args, expected_log_level):
+    mocker.patch("prcop.cli.check", autospec=True)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "run",
+            "--bitbucket-url",
+            "http://bitbucket.test/",
+            "--slack-webhook",
+            "http://slack.test/",
+            "--slack-channel",
+            "channel1",
+            "project1/repo1",
+            *args,
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert logging.getLogger().level == expected_log_level

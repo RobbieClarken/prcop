@@ -1,8 +1,13 @@
+import logging
+
 import click
 
 from .checker import check
 from .config import Config
 from .reporters import SlackReporter
+
+
+logging.basicConfig(level="WARNING", format="%(asctime)s [%(levelname)s] %(name)s %(message)s")
 
 
 @click.group()
@@ -16,8 +21,11 @@ def cli():
 @click.option("--slack-channel", required=True)
 @click.option("--database")
 @click.option("--no-verify-https", is_flag=True)
-@click.argument("repos", nargs=-1, metavar="[REPO...]")
-def run(bitbucket_url, slack_webhook, slack_channel, repos, database, no_verify_https):
+@click.option("-v", "--verbose", count=True)
+@click.argument("repos", nargs=-1, metavar="[REPO...]", required=True)
+def run(bitbucket_url, slack_webhook, slack_channel, repos, database, no_verify_https, verbose):
+    if verbose:
+        logging.getLogger().setLevel("DEBUG" if verbose > 1 else "INFO")
     config = Config(verify_https=not no_verify_https)
     if database:
         config.database = database
