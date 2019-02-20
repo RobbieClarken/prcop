@@ -1,4 +1,5 @@
 import logging
+from textwrap import dedent
 from unittest.mock import ANY, call
 
 import pytest
@@ -23,6 +24,43 @@ def test_run_command_executes_check(mocker):
             "channel1",
             "project1/repo1",
             "project2/repo2",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert mock_check.call_args == call(
+        "http://bitbucket.test/",
+        ["project1/repo1", "project2/repo2"],
+        reporter=MockSlackReporter.return_value,
+        config=ANY,
+    )
+    assert MockSlackReporter.call_args == call(url="http://slack.test/", channel="channel1")
+
+
+def test_run_command_takes_input_from_file(mocker, tmpdir):
+    input_file = tmpdir.join("file.txt")
+    input_file.write(
+        dedent(
+            """\
+            project1/repo1
+            project2/repo2
+            """
+        )
+    )
+    mock_check = mocker.patch("prcop.cli.check", autospec=True)
+    MockSlackReporter = mocker.patch("prcop.cli.SlackReporter", autospec=True)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "run",
+            "--bitbucket-url",
+            "http://bitbucket.test/",
+            "--slack-webhook",
+            "http://slack.test/",
+            "--slack-channel",
+            "channel1",
+            "-i",
+            str(input_file),
         ],
     )
     assert result.exit_code == 0, result.output
