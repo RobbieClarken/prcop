@@ -25,14 +25,11 @@ class PullRequest:
         self._record = record
 
     def alerts(self):
-        logger.debug(
-            "%s business hours since opened: %s",
-            self._repo.full_slug,
-            self.business_hours_since_opened,
-        )
-        logger.debug("%s recently alerted: %s", self._repo.full_slug, self._recently_alerted)
-        logger.debug("%s reviews remaining: %s", self._repo.full_slug, self.reviews_remaining)
-        logger.debug("%s needs work: %s", self._repo.full_slug, self._needs_work)
+        id_str = f"{self._repo.full_slug}#{self._id}"
+        logger.debug(f"{id_str} business hours since opened: {self.business_hours_since_opened}")
+        logger.debug(f"{id_str} recently alerted: {self._recently_alerted}")
+        logger.debug(f"{id_str} reviews remaining: {self.reviews_remaining}")
+        logger.debug(f"{id_str} needs work: {self._needs_work}")
         if (
             self.business_hours_since_opened >= self._MIN_TIME_OPENED
             and not self._recently_alerted
