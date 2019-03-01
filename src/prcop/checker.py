@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class PullRequest:
 
-    _MIN_TIME_OPENED = timedelta(hours=3)
+    _MIN_TIME_SINCE_UPDATED = timedelta(hours=3)
     _MIN_APPROVALS = 2
 
     def __init__(self, data, *, repo, record):
@@ -26,12 +26,12 @@ class PullRequest:
 
     def alerts(self):
         id_str = f"{self._repo.full_slug}#{self._id}"
-        logger.debug(f"{id_str} business hours since opened: {self.business_hours_since_opened}")
+        logger.debug(f"{id_str} business hours since updated: {self.business_hours_since_updated}")
         logger.debug(f"{id_str} recently alerted: {self._recently_alerted}")
         logger.debug(f"{id_str} reviews remaining: {self.reviews_remaining}")
         logger.debug(f"{id_str} needs work: {self._needs_work}")
         if (
-            self.business_hours_since_opened >= self._MIN_TIME_OPENED
+            self.business_hours_since_updated >= self._MIN_TIME_SINCE_UPDATED
             and not self._recently_alerted
             and self.reviews_remaining
             and not self._needs_work
@@ -65,9 +65,9 @@ class PullRequest:
         return any(review["status"] == "NEEDS_WORK" for review in self._data["reviewers"])
 
     @property
-    def business_hours_since_opened(self):
+    def business_hours_since_updated(self):
         return business_hours_between_dates(
-            datetime.fromtimestamp(self._data["createdDate"] / 1000), datetime.now()
+            datetime.fromtimestamp(self._data["updatedDate"] / 1000), datetime.now()
         )
 
     @property

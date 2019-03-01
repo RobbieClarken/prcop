@@ -75,7 +75,7 @@ def _check(context):
             {
                 "id": 1,
                 "title": context.name,
-                "createdDate": context.opened,
+                "updatedDate": context.opened,
                 "reviewers": context.reviewers,
             }
         ]

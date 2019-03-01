@@ -9,7 +9,7 @@ from prcop.alerts import ReviewOverdueAlert
 @dataclass
 class PullRequestStub:
     title: str = "title1"
-    business_hours_since_opened: timedelta = timedelta(hours=1)
+    business_hours_since_updated: timedelta = timedelta(hours=1)
     reviews_remaining: int = 1
     url: str = "http://test/pr1/"
 

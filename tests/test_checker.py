@@ -10,7 +10,7 @@ from prcop.http_client import HttpClient
 
 class PR:
     def __init__(self):
-        self.data = {"id": 1, "createdDate": 0, "title": "pr-title", "reviewers": []}
+        self.data = {"id": 1, "updatedDate": 0, "title": "pr-title", "reviewers": []}
 
     def with_approvals(self, n):
         self.data["reviewers"] += [{"status": "APPROVED"}] * n

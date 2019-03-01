@@ -10,7 +10,7 @@ Feature: we can check PRs
       Then check will report 1 alerts
        And the text of the first alert will be
            """
-           Pull request "pr-name-1" (opened 3 business hours ago) needs 2 more reviews:
+           Pull request "pr-name-1" (last updated 3 business hours ago) needs 2 more reviews:
            http://bitbucket.test/projects/project1/repos/repo1/pull-requests/1/
            """
 
