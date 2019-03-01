@@ -1,8 +1,19 @@
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import freezegun
 import requests_mock
 from behave import fixture, use_fixture
+
+from prcop.config import Config
+
+
+@fixture
+def prcop_config_fixture(context):
+    with TemporaryDirectory() as tmp_dir:
+        database = str(Path(tmp_dir) / "prcop.json")
+        context.prcop_config = Config(database=database)
+        yield
 
 
 @fixture
@@ -20,10 +31,7 @@ def freezegun_fixture(context):
 
 
 def before_scenario(context, scenario):
-    try:
-        Path("/tmp/prcopdb.json").unlink()
-    except FileNotFoundError:
-        pass
+    use_fixture(prcop_config_fixture, context)
     for tag in scenario.feature.tags:
         if tag == "fixture.requests_mock":
             use_fixture(request_mock_fixture, context)
