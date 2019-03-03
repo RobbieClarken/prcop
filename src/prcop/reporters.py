@@ -9,5 +9,10 @@ class SlackReporter:
 
     def report(self, alerts):
         for alert in alerts:
-            payload = {"channel": self._channel, "text": str(alert)}
+            payload = {
+                "channel": self._channel,
+                "text": str(alert),
+                "username": "PR Cop",
+                "icon_emoji": ":cop:",
+            }
             self._http.post(self._url, payload=payload)
