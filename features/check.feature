@@ -14,6 +14,13 @@ Feature: we can check PRs
            http://bitbucket.test/projects/project1/repos/repo1/pull-requests/1/
            """
 
+  Scenario: PR with title starting with WIP will not generate alerts
+     Given a PR named "WIP: pr-name-1" is opened on Monday, 4 Feb 2019 at 09:00
+       And we wait 3 hours
+       And the repo has 0 approvals
+      When we check if reviews are due
+      Then check will report 0 alerts
+
   Scenario: PR has a needs-work review
      Given a PR named "pr-name-1" is opened on Monday, 4 Feb 2019 at 09:00
        And the repo has 0 approvals

@@ -26,12 +26,14 @@ class PullRequest:
 
     def alerts(self):
         id_str = f"{self._repo.full_slug}#{self._id}"
+        logger.debug(f"{id_str} is labeled work in progress: {self._labeled_work_in_progress}")
         logger.debug(f"{id_str} business hours since updated: {self.business_hours_since_updated}")
         logger.debug(f"{id_str} recently alerted: {self._recently_alerted}")
         logger.debug(f"{id_str} reviews remaining: {self.reviews_remaining}")
         logger.debug(f"{id_str} needs work: {self._needs_work}")
         if (
             self.business_hours_since_updated >= self._MIN_TIME_SINCE_UPDATED
+            and not self._labeled_work_in_progress
             and not self._recently_alerted
             and self.reviews_remaining
             and not self._needs_work
@@ -51,6 +53,10 @@ class PullRequest:
     @property
     def title(self):
         return self._data["title"]
+
+    @property
+    def _labeled_work_in_progress(self):
+        return self.title.startswith("WIP")
 
     @property
     def _recently_alerted(self):
